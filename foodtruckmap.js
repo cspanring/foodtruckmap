@@ -1,5 +1,5 @@
 $(document).ready(function() {
-
+	
 	fixContentHeight = function () { // fix map height
 		var header = $("div[data-role='header']:visible"),
 		content = $("div[data-role='content']:visible:visible"),
@@ -33,10 +33,11 @@ $(document).ready(function() {
 	}
 
 	loadFoodTrucks = function (param) {
+		$.mobile.pageLoading();
 		var mapBounds = new google.maps.LatLngBounds();
 		if (param.userloc) mapBounds.extend(param.userloc);
 		$.getJSON('https://api.foursquare.com/v2/venues/search?ll=' + param.lat + ',' + param.lng + '&categoryId=4bf58dd8d48988d1cb941735&client_id=MZPYKG1K3WKFMVR1GQYBHJC30D1GTMEIVHTMK3W1QN5FV2TP&client_secret=SSVS3SPTBEL3U4551F3VYKWSXLFIBF1LBZUMTPUUMYCJ4XEL&limit=20', function(data) {
-			if (data.response.groups.length > 0) {
+			if (data.response.groups[0].items.length > 0) {
 				$(data.response.groups).each(function(index) { // groups: nearby, trending
 					$(this.items).each(function(index) {
 						var foodtruck = this;
@@ -55,7 +56,7 @@ $(document).ready(function() {
 			}
 		})
 		.error( function() { 
-			alert("Sorry, couldn't find any Food Trucks near you."); 
+			loadFoodTrucks(param); //try again
 		})
 		.complete( function() { 
 			$.mobile.pageLoading( true ); 
@@ -67,13 +68,11 @@ $(document).ready(function() {
 		$('#map_canvas').gmap('clearMarkers');
 		addFoodTruckMarker($.userloc, 'userloc.png', 'That\'s you.');
 		var mapCenter = $('#map_canvas').gmap('getMap');
-		$.mobile.pageLoading();
 		loadFoodTrucks({lat: mapCenter.center.lat(), lng: mapCenter.center.lng()});
 		return false;
 	});
 
 	$('#start-page').live('pageshow', function() {
-		$.mobile.pageLoading();
 		$('#map_canvas').gmap( { 
 			'center': new google.maps.LatLng(39.828175, -98.5795), 
 			'zoom': 4,  
