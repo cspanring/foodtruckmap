@@ -35,28 +35,24 @@ $(document).ready(function() {
 	loadFoodTrucks = function (param) {
 		var mapBounds = new google.maps.LatLngBounds();
 		if (param.userloc) mapBounds.extend(param.userloc);
-		$.ajax({
-			url: 'https://api.foursquare.com/v2/venues/search?ll=' + param.lat + ',' + param.lng + '&categoryId=4bf58dd8d48988d1cb941735&client_id=MZPYKG1K3WKFMVR1GQYBHJC30D1GTMEIVHTMK3W1QN5FV2TP&client_secret=SSVS3SPTBEL3U4551F3VYKWSXLFIBF1LBZUMTPUUMYCJ4XEL&limit=20',
-			success: function(data) {
-				var dataObj = jQuery.parseJSON(data); // FF4 seems to be very picky
-				if (dataObj.meta.code === 200 && dataObj.response.groups.length > 0) {
-					$(dataObj.response.groups).each(function(index) { // groups: nearby, trending
-						$(this.items).each(function(index) {
-							var foodtruck = this;
-							var foodtruckPosition = new google.maps.LatLng(foodtruck.location.lat, foodtruck.location.lng);
-							var foodtruckIcon = (foodtruck.hereNow.count > 0) ? 'foodtruck_active.png' : 'foodtruck_inactive.png';
-							var foodtruckStreet = (foodtruck.location.address) ? '<br>' + foodtruck.location.address : '';
-							var foodtruckContent = '<a href="https://foursquare.com/venue/' + foodtruck.id + '"><strong>' + foodtruck.name + '</strong></a>' + foodtruckStreet + '<br>(' + foodtruck.hereNow.count + ' people checked in)';
-							mapBounds.extend(foodtruckPosition);
-							addFoodTruckMarker(foodtruckPosition, foodtruckIcon, foodtruckContent);
-						});
-						if (param.zoomtotrucks) $('#map_canvas').gmap('getMap').fitBounds(mapBounds);
+		$.getJSON('https://api.foursquare.com/v2/venues/search?ll=' + param.lat + ',' + param.lng + '&categoryId=4bf58dd8d48988d1cb941735&client_id=MZPYKG1K3WKFMVR1GQYBHJC30D1GTMEIVHTMK3W1QN5FV2TP&client_secret=SSVS3SPTBEL3U4551F3VYKWSXLFIBF1LBZUMTPUUMYCJ4XEL&limit=20', function(data) {
+			if (data.response.groups.length > 0 && data.meta.code === 200) {
+				$(data.response.groups).each(function(index) { // groups: nearby, trending
+					$(this.items).each(function(index) {
+						var foodtruck = this;
+						var foodtruckPosition = new google.maps.LatLng(foodtruck.location.lat, foodtruck.location.lng);
+						var foodtruckIcon = (foodtruck.hereNow.count > 0) ? 'foodtruck_active.png' : 'foodtruck_inactive.png';
+						var foodtruckStreet = (foodtruck.location.address) ? '<br>' + foodtruck.location.address : '';
+						var foodtruckContent = '<a href="https://foursquare.com/venue/' + foodtruck.id + '"><strong>' + foodtruck.name + '</strong></a>' + foodtruckStreet + '<br>(' + foodtruck.hereNow.count + ' people checked in)';
+						mapBounds.extend(foodtruckPosition);
+						addFoodTruckMarker(foodtruckPosition, foodtruckIcon, foodtruckContent);
 					});
-					$.mobile.pageLoading( true );
-				} else {
-					alert("Sorry, couldn't find any Food Trucks near you.");
-					$.mobile.pageLoading( true );
-				}
+					if (param.zoomtotrucks) $('#map_canvas').gmap('getMap').fitBounds(mapBounds);
+				});
+				$.mobile.pageLoading( true );
+			} else {
+				alert("Sorry, couldn't find any Food Trucks near you.");
+				$.mobile.pageLoading( true );
 			}
 		});
 	}
