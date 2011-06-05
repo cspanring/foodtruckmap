@@ -94,8 +94,8 @@ $(document).ready(function() {
 						},
 						{
 							enableHighAccuracy: true, 
-							maximumAge: (1000 * 60 * 15), 
-							timeout: (20 * 1000)
+							maximumAge: (1000 * 60 * 10), 
+							timeout: (1000 * 20)
 						}
 					);
 				}
